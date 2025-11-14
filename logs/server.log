@@ -1,17 +1,17 @@
 INFO:     Will watch for changes in these directories: ['/home/workspace']
 INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
-INFO:     Started reloader process [401] using StatReload
-INFO:     Started server process [403]
+INFO:     Started reloader process [448] using StatReload
+INFO:     Started server process [450]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
-INFO:     172.20.0.1:49244 - "HEAD / HTTP/1.1" 405 Method Not Allowed
-INFO:     172.20.0.1:49252 - "GET /properties/69178d2b6cd2abea0ef9e078 HTTP/1.1" 200 OK
-INFO:     172.20.0.1:49252 - "GET /properties/69178d2b6cd2abea0ef9e078 HTTP/1.1" 200 OK
-INFO:     172.20.0.1:49258 - "GET /properties/69178d2b6cd2abea0ef9e078 HTTP/1.1" 200 OK
-INFO:     172.20.0.1:49258 - "GET /properties/69178d2b6cd2abea0ef9e078 HTTP/1.1" 200 OK
-INFO:     172.20.0.1:59060 - "GET /properties?featured=true HTTP/1.1" 200 OK
-INFO:     172.20.0.1:59060 - "GET /properties?featured=true HTTP/1.1" 200 OK
-INFO:     172.20.0.1:45192 - "GET /properties HTTP/1.1" 200 OK
-INFO:     172.20.0.1:45192 - "GET /properties HTTP/1.1" 200 OK
-INFO:     172.20.0.1:45192 - "GET /properties/69178d2b6cd2abea0ef9e078 HTTP/1.1" 200 OK
-INFO:     172.20.0.1:45192 - "GET /properties/69178d2b6cd2abea0ef9e078 HTTP/1.1" 200 OK
+INFO:     172.20.0.1:60010 - "HEAD / HTTP/1.1" 405 Method Not Allowed
+INFO:     172.20.0.1:60018 - "GET /properties/69178d2b6cd2abea0ef9e078 HTTP/1.1" 200 OK
+INFO:     172.20.0.1:60026 - "GET /properties/69178d2b6cd2abea0ef9e078 HTTP/1.1" 200 OK
+INFO:     172.20.0.1:60018 - "GET /properties/69178d2b6cd2abea0ef9e078 HTTP/1.1" 200 OK
+INFO:     172.20.0.1:60026 - "GET /properties/69178d2b6cd2abea0ef9e078 HTTP/1.1" 200 OK
+INFO:     172.20.0.1:60028 - "GET /properties?featured=true HTTP/1.1" 200 OK
+INFO:     172.20.0.1:60028 - "GET /properties?featured=true HTTP/1.1" 200 OK
+INFO:     172.20.0.1:50172 - "GET /properties HTTP/1.1" 200 OK
+INFO:     172.20.0.1:50172 - "GET /properties HTTP/1.1" 200 OK
+INFO:     172.20.0.1:50172 - "GET /properties/69178d2b6cd2abea0ef9e078 HTTP/1.1" 200 OK
+INFO:     172.20.0.1:50172 - "GET /properties/69178d2b6cd2abea0ef9e078 HTTP/1.1" 200 OK

@@ -11,8 +11,8 @@ Model name is converted to lowercase for the collection name:
 - BlogPost -> "blogs" collection
 """
 
-from pydantic import BaseModel, Field
-from typing import Optional
+from pydantic import BaseModel, Field, EmailStr
+from typing import Optional, List
 
 # Example schemas (replace with your own):
 
@@ -38,11 +38,31 @@ class Product(BaseModel):
     category: str = Field(..., description="Product category")
     in_stock: bool = Field(True, description="Whether product is in stock")
 
-# Add your own schemas here:
-# --------------------------------------------------
+# Real Estate specific schemas
 
-# Note: The Flames database viewer will automatically:
-# 1. Read these schemas from GET /schema endpoint
-# 2. Use them for document validation when creating/editing
-# 3. Handle all database operations (CRUD) directly
-# 4. You don't need to create any database endpoints!
+class Property(BaseModel):
+    """
+    Properties collection schema
+    Collection name: "property"
+    """
+    title: str = Field(..., description="Listing title")
+    location: str = Field(..., description="District and city, e.g., Miraflores, Lima")
+    price_usd: float = Field(..., ge=0, description="Price in USD")
+    beds: Optional[int] = Field(None, ge=0)
+    baths: Optional[float] = Field(None, ge=0)
+    area_m2: Optional[float] = Field(None, ge=0, description="Built area in square meters")
+    type: Optional[str] = Field(None, description="Apartment, House, Penthouse, Lot, etc.")
+    images: List[str] = Field(default_factory=list, description="Image URLs")
+    featured: bool = Field(default=False, description="Show in featured section")
+    description: Optional[str] = Field(None, description="Short description")
+
+class Inquiry(BaseModel):
+    """
+    Inquiries collection schema
+    Collection name: "inquiry"
+    """
+    name: str = Field(..., description="Full name")
+    email: EmailStr = Field(..., description="Email address")
+    phone: Optional[str] = Field(None, description="WhatsApp or phone number")
+    message: str = Field(..., description="Message from prospect")
+    property_id: Optional[str] = Field(None, description="Related property ObjectId as string")

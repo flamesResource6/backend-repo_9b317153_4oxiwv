@@ -1,7 +1,8 @@
 import os
 from datetime import datetime, timezone
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import List, Optional
 
@@ -9,7 +10,7 @@ from database import db, create_document, get_documents
 from schemas import Property, Inquiry
 from bson import ObjectId
 
-app = FastAPI(title="Real Estate Agent API", version="1.1.0")
+app = FastAPI(title="Real Estate Agent API", version="1.2.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -18,6 +19,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Prepare uploads directory and static mount
+BASE_DIR = os.getcwd()
+UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
 
 def serialize_doc(doc: dict) -> dict:
@@ -73,6 +80,29 @@ def test_database():
     response["database_name"] = "✅ Set" if os.getenv("DATABASE_NAME") else "❌ Not Set"
 
     return response
+
+
+# ----------------------- File Uploads -----------------------
+
+@app.post("/upload")
+async def upload_images(request: Request, files: List[UploadFile] = File(...)):
+    """Accept one or multiple image files and store them under /uploads.
+    Returns absolute URLs for immediate use on the frontend.
+    """
+    saved_urls: List[str] = []
+    for f in files:
+        # Basic security: keep only filename tail
+        original = os.path.basename(f.filename)
+        ts = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S%f")
+        name, ext = os.path.splitext(original)
+        safe_name = f"{name[:30].replace(' ', '_')}_{ts}{ext.lower()}"
+        dest_path = os.path.join(UPLOAD_DIR, safe_name)
+        content = await f.read()
+        with open(dest_path, "wb") as out:
+            out.write(content)
+        base = str(request.base_url).rstrip('/')
+        saved_urls.append(f"{base}/uploads/{safe_name}")
+    return {"urls": saved_urls}
 
 
 # ----------------------- Real Estate Endpoints -----------------------

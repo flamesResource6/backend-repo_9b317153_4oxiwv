@@ -6,6 +6,7 @@ from typing import List, Optional
 
 from database import db, create_document, get_documents
 from schemas import Property, Inquiry
+from bson import ObjectId
 
 app = FastAPI(title="Real Estate Agent API", version="1.0.0")
 
@@ -139,6 +140,20 @@ def list_properties(featured: Optional[bool] = None) -> List[dict]:
 
     docs = get_documents("property", query)
     return [serialize_doc(d) for d in docs]
+
+
+@app.get("/properties/{property_id}")
+def get_property(property_id: str) -> dict:
+    if db is None:
+        raise HTTPException(status_code=500, detail="Database not configured")
+    try:
+        obj_id = ObjectId(property_id)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid property id")
+    doc = db["property"].find_one({"_id": obj_id})
+    if not doc:
+        raise HTTPException(status_code=404, detail="Property not found")
+    return serialize_doc(doc)
 
 
 @app.post("/inquiries")

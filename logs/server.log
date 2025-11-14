@@ -1,13 +1,17 @@
 INFO:     Will watch for changes in these directories: ['/home/workspace']
 INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
-INFO:     Started reloader process [252] using StatReload
-INFO:     Started server process [254]
+INFO:     Started reloader process [307] using StatReload
+INFO:     Started server process [309]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
-INFO:     172.20.0.1:36950 - "HEAD / HTTP/1.1" 405 Method Not Allowed
-INFO:     172.20.0.1:36968 - "GET /properties?featured=true HTTP/1.1" 200 OK
-INFO:     172.20.0.1:36956 - "GET /properties?featured=true HTTP/1.1" 200 OK
-INFO:     172.20.0.1:36968 - "GET /properties?featured=true HTTP/1.1" 200 OK
-INFO:     172.20.0.1:36956 - "GET /properties?featured=true HTTP/1.1" 200 OK
-INFO:     172.20.0.1:36668 - "GET /properties?featured=true HTTP/1.1" 200 OK
-INFO:     172.20.0.1:36668 - "GET /properties?featured=true HTTP/1.1" 200 OK
+INFO:     172.20.0.1:60238 - "HEAD / HTTP/1.1" 405 Method Not Allowed
+INFO:     172.20.0.1:60240 - "GET /properties?featured=true HTTP/1.1" 200 OK
+INFO:     172.20.0.1:60240 - "GET /properties?featured=true HTTP/1.1" 200 OK
+INFO:     172.20.0.1:60256 - "GET /properties?featured=true HTTP/1.1" 200 OK
+INFO:     172.20.0.1:60256 - "GET /properties?featured=true HTTP/1.1" 200 OK
+INFO:     172.20.0.1:49284 - "GET /properties?featured=true HTTP/1.1" 200 OK
+INFO:     172.20.0.1:49284 - "GET /properties?featured=true HTTP/1.1" 200 OK
+INFO:     172.20.0.1:45106 - "GET /properties HTTP/1.1" 200 OK
+INFO:     172.20.0.1:45106 - "GET /properties HTTP/1.1" 200 OK
+INFO:     172.20.0.1:45106 - "GET /properties/69178d2b6cd2abea0ef9e079 HTTP/1.1" 200 OK
+INFO:     172.20.0.1:45106 - "GET /properties/69178d2b6cd2abea0ef9e079 HTTP/1.1" 200 OK

@@ -55,6 +55,7 @@ class Property(BaseModel):
     images: List[str] = Field(default_factory=list, description="Image URLs")
     featured: bool = Field(default=False, description="Show in featured section")
     description: Optional[str] = Field(None, description="Short description")
+    views: Optional[int] = Field(0, ge=0, description="View counter for analytics")
 
 class Inquiry(BaseModel):
     """

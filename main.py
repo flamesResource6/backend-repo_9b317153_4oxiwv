@@ -1,4 +1,5 @@
 import os
+from datetime import datetime, timezone
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -8,7 +9,7 @@ from database import db, create_document, get_documents
 from schemas import Property, Inquiry
 from bson import ObjectId
 
-app = FastAPI(title="Real Estate Agent API", version="1.0.0")
+app = FastAPI(title="Real Estate Agent API", version="1.1.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -74,7 +75,7 @@ def test_database():
     return response
 
 
-# Real Estate Endpoints
+# ----------------------- Real Estate Endpoints -----------------------
 
 @app.get("/properties")
 def list_properties(featured: Optional[bool] = None) -> List[dict]:
@@ -98,7 +99,8 @@ def list_properties(featured: Optional[bool] = None) -> List[dict]:
                     "https://images.unsplash.com/photo-1502673530728-f79b4cab31b1?q=80&w=1800&auto=format&fit=crop"
                 ],
                 "featured": True,
-                "description": "Exclusivo penthouse con terraza y vista panorámica al océano Pacífico."
+                "description": "Exclusivo penthouse con terraza y vista panorámica al océano Pacífico.",
+                "views": 0,
             },
             {
                 "title": "Departamento moderno en San Isidro",
@@ -112,7 +114,8 @@ def list_properties(featured: Optional[bool] = None) -> List[dict]:
                     "https://images.unsplash.com/photo-1502005229762-cf1b2da7c5d6?q=80&w=1800&auto=format&fit=crop"
                 ],
                 "featured": True,
-                "description": "Acabados de lujo, iluminación natural y ubicación privilegiada."
+                "description": "Acabados de lujo, iluminación natural y ubicación privilegiada.",
+                "views": 0,
             },
             {
                 "title": "Casa familiar con jardín",
@@ -126,7 +129,8 @@ def list_properties(featured: Optional[bool] = None) -> List[dict]:
                     "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=1800&auto=format&fit=crop"
                 ],
                 "featured": False,
-                "description": "Amplios ambientes, jardín y zona tranquila."
+                "description": "Amplios ambientes, jardín y zona tranquila.",
+                "views": 0,
             }
         ]
         for p in demo_props:
@@ -153,7 +157,83 @@ def get_property(property_id: str) -> dict:
     doc = db["property"].find_one({"_id": obj_id})
     if not doc:
         raise HTTPException(status_code=404, detail="Property not found")
+    # Increment views for analytics
+    try:
+        db["property"].update_one({"_id": obj_id}, {"$inc": {"views": 1}, "$set": {"updated_at": datetime.now(timezone.utc)}})
+    except Exception:
+        pass
     return serialize_doc(doc)
+
+
+# ----------------------- Admin: CRUD Properties -----------------------
+
+class PropertyUpdate(BaseModel):
+    title: Optional[str] = None
+    location: Optional[str] = None
+    price_usd: Optional[float] = None
+    beds: Optional[int] = None
+    baths: Optional[float] = None
+    area_m2: Optional[float] = None
+    type: Optional[str] = None
+    images: Optional[List[str]] = None
+    featured: Optional[bool] = None
+    description: Optional[str] = None
+
+
+@app.post("/properties")
+def create_property(payload: Property) -> dict:
+    if db is None:
+        raise HTTPException(status_code=500, detail="Database not configured")
+    data = payload.model_dump()
+    if "views" not in data:
+        data["views"] = 0
+    prop_id = create_document("property", data)
+    return {"id": prop_id, "status": "ok"}
+
+
+@app.put("/properties/{property_id}")
+def update_property(property_id: str, payload: PropertyUpdate) -> dict:
+    if db is None:
+        raise HTTPException(status_code=500, detail="Database not configured")
+    try:
+        obj_id = ObjectId(property_id)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid property id")
+
+    update_data = {k: v for k, v in payload.model_dump().items() if v is not None}
+    if not update_data:
+        raise HTTPException(status_code=400, detail="No fields to update")
+
+    update_data["updated_at"] = datetime.now(timezone.utc)
+    res = db["property"].update_one({"_id": obj_id}, {"$set": update_data})
+    if res.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Property not found")
+    doc = db["property"].find_one({"_id": obj_id})
+    return serialize_doc(doc)
+
+
+@app.delete("/properties/{property_id}")
+def delete_property(property_id: str) -> dict:
+    if db is None:
+        raise HTTPException(status_code=500, detail="Database not configured")
+    try:
+        obj_id = ObjectId(property_id)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid property id")
+    res = db["property"].delete_one({"_id": obj_id})
+    if res.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Property not found")
+    return {"status": "ok"}
+
+
+# ----------------------- Admin: Inquiries & Stats -----------------------
+
+@app.get("/inquiries")
+def list_inquiries() -> List[dict]:
+    if db is None:
+        raise HTTPException(status_code=500, detail="Database not configured")
+    cursor = db["inquiry"].find({}).sort("created_at", -1)
+    return [serialize_doc(d) for d in cursor]
 
 
 @app.post("/inquiries")
@@ -162,6 +242,24 @@ def create_inquiry(payload: Inquiry) -> dict:
         raise HTTPException(status_code=500, detail="Database not configured")
     inquiry_id = create_document("inquiry", payload)
     return {"id": inquiry_id, "status": "ok"}
+
+
+@app.get("/stats")
+def get_stats():
+    if db is None:
+        raise HTTPException(status_code=500, detail="Database not configured")
+    total_properties = db["property"].count_documents({})
+    total_inquiries = db["inquiry"].count_documents({})
+    top_properties = list(db["property"].find({}).sort("views", -1).limit(5))
+    top_properties = [serialize_doc(p) for p in top_properties]
+    recent_inquiries = list(db["inquiry"].find({}).sort("created_at", -1).limit(5))
+    recent_inquiries = [serialize_doc(i) for i in recent_inquiries]
+    return {
+        "total_properties": total_properties,
+        "total_inquiries": total_inquiries,
+        "top_properties": top_properties,
+        "recent_inquiries": recent_inquiries,
+    }
 
 
 if __name__ == "__main__":
